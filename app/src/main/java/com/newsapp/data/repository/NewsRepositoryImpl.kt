@@ -1,5 +1,6 @@
 package com.newsapp.data.repository
 
+import com.newsapp.BuildConfig
 import com.newsapp.data.remote.api.NewsApiService
 import com.newsapp.data.remote.dto.toDomain
 import com.newsapp.domain.model.Article
@@ -15,7 +16,7 @@ class NewsRepositoryImpl @Inject constructor(
         return try {
             val response = apiService.getTopHeadlines(
                 sources = source,
-                apiKey = "API_KEY"
+                apiKey = BuildConfig.API_KEY
             )
 
             val articles = response.articles.toDomain()
