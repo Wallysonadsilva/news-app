@@ -32,6 +32,25 @@ android {
         buildConfigField("String", "API_KEY", "\"$apiKey\"")
     }
 
+    flavorDimensions += "newsSource"
+    productFlavors {
+        create("bbc") {
+            dimension = "newsSource"
+            applicationIdSuffix = ".bbc"
+            versionNameSuffix = "-bbc"
+            resValue("string", "app_name", "BBC News")
+            buildConfigField("String", "NEWS_SOURCE", "\"bbc-news\"")
+        }
+
+        create("espn") {
+            dimension = "newsSource"
+            applicationIdSuffix = ".espn"
+            versionNameSuffix = "-espn"
+            resValue("string", "app_name", "ESPN News")
+            buildConfigField("String", "NEWS_SOURCE", "\"espn\"")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false

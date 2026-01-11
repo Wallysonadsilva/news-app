@@ -1,6 +1,5 @@
 package com.newsapp.presentation.headlines
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,9 +18,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.newsapp.R
 import com.newsapp.domain.model.Article
 import com.newsapp.domain.model.UiState
 import com.newsapp.presentation.headlines.ui.ArticleCard
@@ -54,10 +55,12 @@ private fun HeadlinesContent(
     onRetry: () -> Unit,
     onArticleClick: (Article) -> Unit
 ) {
+    val context = LocalContext.current
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("BBC News") },
+                title = { Text(context.getString(R.string.app_name)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF3F9AAE),
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer

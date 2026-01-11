@@ -2,6 +2,7 @@ package com.newsapp.presentation.headlines
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.newsapp.BuildConfig
 import com.newsapp.domain.model.Article
 import com.newsapp.domain.model.UiState
 import com.newsapp.domain.repository.NewsRepository
@@ -20,7 +21,7 @@ class HeadlinesViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<UiState<List<Article>>>(UiState.Loading)
     val uiState: StateFlow<UiState<List<Article>>> = _uiState.asStateFlow()
-    private val newsSource = "bbc-news"
+    private val newsSource = BuildConfig.NEWS_SOURCE
 
     init {
         loadHeadlines(isRefresh = false)
