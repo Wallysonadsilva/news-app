@@ -85,6 +85,8 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
 
+    implementation(libs.androidx.biometric)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)
