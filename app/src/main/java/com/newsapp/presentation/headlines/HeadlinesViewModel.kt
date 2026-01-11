@@ -6,6 +6,7 @@ import com.newsapp.domain.model.Article
 import com.newsapp.domain.model.UiState
 import com.newsapp.domain.repository.NewsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,13 +23,25 @@ class HeadlinesViewModel @Inject constructor(
     private val newsSource = "bbc-news"
 
     init {
-        loadHeadlines()
+        loadHeadlines(isRefresh = false)
     }
 
-    fun loadHeadlines() {
+    fun loadHeadlines(isRefresh: Boolean = true) {
         viewModelScope.launch {
             _uiState.value = UiState.Loading
+
+            val startTime = System.currentTimeMillis()
+
             val result = repository.getTopHeadlines(newsSource)
+
+            if (isRefresh) {
+                val elapsedTime = System.currentTimeMillis() - startTime
+                val remainingTime = 400 - elapsedTime
+                if (remainingTime > 0) {
+                    delay(remainingTime)
+                }
+            }
+
             _uiState.value = result
         }
     }

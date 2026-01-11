@@ -83,6 +83,8 @@ dependencies {
 
     implementation(libs.coil.compose)
 
+    implementation(libs.androidx.navigation.compose)
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.mockk)

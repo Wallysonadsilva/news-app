@@ -1,5 +1,6 @@
 package com.newsapp.presentation.headlines
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,10 +13,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.newsapp.domain.model.Article
@@ -24,6 +28,7 @@ import com.newsapp.presentation.headlines.ui.ArticleCard
 import com.newsapp.presentation.headlines.ui.EmptyState
 import com.newsapp.presentation.headlines.ui.ErrorState
 import com.newsapp.presentation.headlines.ui.LoadingState
+import com.newsapp.ui.theme.NewsAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,35 +38,55 @@ fun HeadlinesScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    HeadlinesContent(
+        uiState = uiState,
+        onRefresh = { viewModel.loadHeadlines() },
+        onRetry = { viewModel.retry() },
+        onArticleClick = onArticleClick
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HeadlinesContent(
+    uiState: UiState<List<Article>>,
+    onRefresh: () -> Unit,
+    onRetry: () -> Unit,
+    onArticleClick: (Article) -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("BBC News") },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    containerColor = Color(0xFF3F9AAE),
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
         }
     ) { paddingValues ->
-        // Handle different UI states
-        when (val state = uiState) {
+        when (uiState) {
             is UiState.Loading -> {
                 LoadingState(modifier = Modifier.padding(paddingValues))
             }
 
             is UiState.Success -> {
-                ArticlesList(
-                    articles = state.data,
-                    onArticleClick = onArticleClick,
-                    modifier = Modifier.padding(paddingValues)
-                )
+                PullToRefreshBox(
+                    isRefreshing = false,
+                    onRefresh = onRefresh
+                ) {
+                    ArticlesList(
+                        articles = uiState.data,
+                        onArticleClick = onArticleClick,
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
             }
 
             is UiState.Error -> {
                 ErrorState(
-                    message = state.message,
-                    onRetry = { viewModel.retry() },
+                    message = uiState.message,
+                    onRetry = onRetry,
                     modifier = Modifier.padding(paddingValues)
                 )
             }
@@ -85,7 +110,7 @@ private fun ArticlesList(
         ) {
             items(
                 items = articles,
-                key = { article -> article.id }
+                key = { it.id }
             ) { article ->
                 ArticleCard(
                     article = article,
@@ -95,3 +120,67 @@ private fun ArticlesList(
         }
     }
 }
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun HeadlinesSuccessPreview() {
+    NewsAppTheme {
+        HeadlinesContent(
+            uiState = UiState.Success(sampleArticles),
+            onRefresh = {},
+            onRetry = {},
+            onArticleClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun HeadlinesErrorPreview() {
+    NewsAppTheme {
+        HeadlinesContent(
+            uiState = UiState.Error("Failed to load headlines"),
+            onRefresh = {},
+            onRetry = {},
+            onArticleClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun HeadlinesEmptyPreview() {
+    NewsAppTheme {
+        HeadlinesContent(
+            uiState = UiState.Success(emptyList()),
+            onRefresh = {},
+            onRetry = {},
+            onArticleClick = {}
+        )
+    }
+}
+
+private val sampleArticles = listOf(
+    Article(
+        id = "1",
+        source = "News Source",
+        author = "Author Name",
+        title = "Article Title Goes Here",
+        description = "Article description with some details about the content.",
+        url = "https://example.com",
+        imageUrl = "https://via.placeholder.com/400x200",
+        publishedAt = "",
+        content = null
+    ),
+    Article(
+        id = "2",
+        source = "News Source",
+        author = "Author Name",
+        title = "Another Article Title",
+        description = "Article description with some details about the content.",
+        url = "https://example.com",
+        imageUrl = "https://via.placeholder.com/400x200",
+        publishedAt = "",
+        content = null
+    )
+)
