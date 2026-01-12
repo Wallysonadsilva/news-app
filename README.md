@@ -78,5 +78,12 @@ com.newsapp/
 |:---:|:---:|:---:|
 | ![Headlines](https://github.com/user-attachments/assets/21c2c6b5-038b-4564-b04a-18beb94dc4e2) | ![Detail](https://github.com/user-attachments/assets/592b6647-5b43-4f67-9edf-a6529f0f8f72) | ![WebView](https://github.com/user-attachments/assets/152c62b5-4c3e-4a7f-aad0-f8e758ec36b1) |
 
+## APK
+
+| Build Variant | Download |
+|:---:|:---:|
+| **BBC News** | [Download APK](https://github.com/wallysonr/News-App/releases/download/v1.0/app-bbc-debug.apk) |
+| **ESPN News** | [Download APK](https://github.com/wallysonr/News-App/releases/download/v1.0/app-espn-debug.apk) |
+
 
 
