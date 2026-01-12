@@ -9,15 +9,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.newsapp.navigation.NewsNavGraph
+import com.newsapp.presentation.BiometricAuthViewModel
 import com.newsapp.presentation.LockScreen
 import com.newsapp.ui.theme.NewsAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,50 +33,40 @@ class MainActivity : FragmentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // Checks if biometric is available
+
+                    val viewModel: BiometricAuthViewModel = hiltViewModel()
+
+                    // Check biometric availability
                     val biometricManager = BiometricManager.from(this)
                     val canAuthenticate = biometricManager.canAuthenticate(
                         BiometricManager.Authenticators.BIOMETRIC_STRONG
                     )
 
-                    val requiresAuth = canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS
+                    val requiresAuth =
+                        canAuthenticate == BiometricManager.BIOMETRIC_SUCCESS
 
-                    var isAuthenticated by remember { mutableStateOf(!requiresAuth) }
-                    var errorMessage by remember { mutableStateOf<String?>(null) }
-                    var shouldShowPrompt by remember { mutableStateOf(requiresAuth) }
-
-                    LaunchedEffect(shouldShowPrompt) {
-                        if (shouldShowPrompt) {
-                            shouldShowPrompt = false
+                    LaunchedEffect(viewModel.shouldRequestAuth) {
+                        if (
+                            requiresAuth &&
+                            viewModel.shouldRequestAuth &&
+                            !viewModel.isAuthenticated
+                        ) {
                             showBiometricPrompt(
-                                onSuccess = {
-                                    isAuthenticated = true
-                                    errorMessage = null
-                                },
-                                onError = { error ->
-                                    errorMessage = error
-                                }
+                                onSuccess = viewModel::onAuthSuccess,
+                                onError = viewModel::onAuthError
                             )
                         }
                     }
 
-                    if (isAuthenticated) {
+                    if (viewModel.isAuthenticated || !requiresAuth) {
                         val navController = rememberNavController()
                         NewsNavGraph(navController = navController)
                     } else {
                         LockScreen(
+                            errorMessage = viewModel.errorMessage,
                             onAuthenticateClick = {
-                                showBiometricPrompt(
-                                    onSuccess = {
-                                        isAuthenticated = true
-                                        errorMessage = null
-                                    },
-                                    onError = { error ->
-                                        errorMessage = error
-                                    }
-                                )
-                            },
-                            errorMessage = errorMessage
+                                viewModel.requestAuth()
+                            }
                         )
                     }
                 }
@@ -96,14 +84,21 @@ class MainActivity : FragmentActivity() {
             this,
             executor,
             object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+
+                override fun onAuthenticationSucceeded(
+                    result: BiometricPrompt.AuthenticationResult
+                ) {
                     super.onAuthenticationSucceeded(result)
                     onSuccess()
                 }
 
-                override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                override fun onAuthenticationError(
+                    errorCode: Int,
+                    errString: CharSequence
+                ) {
                     super.onAuthenticationError(errorCode, errString)
-                    if (errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
+                    if (
+                        errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
                         errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON
                     ) {
                         onError("Authentication required to continue")
