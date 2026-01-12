@@ -11,7 +11,7 @@ import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
 class NewsApplication : Application(), ImageLoaderFactory {
-    override fun newImageLoader(): coil.ImageLoader {
+    override fun newImageLoader(): ImageLoader {
         return ImageLoader.Builder(this)
             .memoryCache {
                 MemoryCache.Builder(this)

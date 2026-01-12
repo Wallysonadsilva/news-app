@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,7 +34,10 @@ fun ArticleCard(
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column (modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
+        Column (
+            modifier = Modifier
+                .background(Color.LightGray.copy(alpha = 0.6f))
+        ) {
             article.imageUrl?.let { imageUrl ->
                 AsyncImage(
                     model = imageUrl,
@@ -52,7 +56,7 @@ fun ArticleCard(
                 Text(
                     text = article.source,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary
+                    color = Color.Blue,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -60,6 +64,7 @@ fun ArticleCard(
                 Text(
                     text = article.title,
                     style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 3,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -71,7 +76,7 @@ fun ArticleCard(
                         style = MaterialTheme.typography.bodyMedium,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
