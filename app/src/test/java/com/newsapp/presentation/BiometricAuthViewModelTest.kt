@@ -1,5 +1,6 @@
 package com.newsapp.presentation
 
+import com.newsapp.presentation.biometric.BiometricAuthViewModel
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test

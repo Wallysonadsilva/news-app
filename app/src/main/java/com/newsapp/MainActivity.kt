@@ -15,8 +15,8 @@ import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.newsapp.navigation.NewsNavGraph
-import com.newsapp.presentation.BiometricAuthViewModel
-import com.newsapp.presentation.LockScreen
+import com.newsapp.presentation.biometric.BiometricAuthViewModel
+import com.newsapp.presentation.biometric.LockScreen
 import com.newsapp.ui.theme.NewsAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 

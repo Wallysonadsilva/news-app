@@ -1,4 +1,4 @@
-package com.newsapp.presentation
+package com.newsapp.presentation.biometric
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
