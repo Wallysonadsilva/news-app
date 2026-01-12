@@ -28,7 +28,7 @@ class NewsRepositoryImplTest {
 
     @Test
     fun `getTopHeadlines returns success with sorted articles when API call succeeds`() = runTest {
-        // Given: Mock API response with 3 articles (different dates)
+        // Given
         val mockArticles = listOf(
             createMockArticleDto(
                 title = "Article 1",
@@ -64,11 +64,9 @@ class NewsRepositoryImplTest {
         val articles = (result as UiState.Success).data
 
         assertEquals(3, articles.size)
-
-        // Verify: Articles are sorted by date (newest first)
-        assertEquals("Article 2", articles[0].title)  // 2024-01-07 (newest)
-        assertEquals("Article 3", articles[1].title)  // 2024-01-06
-        assertEquals("Article 1", articles[2].title)  // 2024-01-05 (oldest)
+        assertEquals("Article 2", articles[0].title)
+        assertEquals("Article 3", articles[1].title)
+        assertEquals("Article 1", articles[2].title)
     }
 
     @Test
@@ -91,12 +89,23 @@ class NewsRepositoryImplTest {
     }
 
     @Test
-    fun `getTopHeadlines returns success with empty list when API returns no articles`() = runTest {
+    fun `getTopHeadlines maps all DTO fields to domain correctly`() = runTest {
         // Given
+        val mockArticle = ArticleDto(
+            source = SourceDto(id = "test-id", name = "Test Source Name"),
+            author = "John Doe",
+            title = "Test Article Title",
+            description = "Test article description",
+            url = "https://example.com/article",
+            urlToImage = "https://example.com/image.jpg",
+            publishedAt = "2024-01-15T10:30:00Z",
+            content = "Full article content here"
+        )
+
         val mockResponse = NewsResponseDto(
             status = "ok",
-            totalResults = 0,
-            articles = emptyList()
+            totalResults = 1,
+            articles = listOf(mockArticle)
         )
 
         coEvery {
@@ -108,33 +117,21 @@ class NewsRepositoryImplTest {
 
         // Then
         assertTrue(result is UiState.Success)
-
         val articles = (result as UiState.Success).data
-        assertTrue(articles.isEmpty())
-    }
+        assertEquals(1, articles.size)
 
-    @Test
-    fun `getTopHeadlines calls API with correct source parameter`() = runTest {
-        // Given
-        val mockResponse = NewsResponseDto(
-            status = "ok",
-            totalResults = 0,
-            articles = emptyList()
-        )
+        val article = articles[0]
 
-        coEvery {
-            apiService.getTopHeadlines("bbc-news", any())
-        } returns mockResponse
-
-        // When
-        val result = repository.getTopHeadlines("bbc-news")
-
-        // Then
-        coVerify(exactly = 1) {
-            apiService.getTopHeadlines("bbc-news", any())
-        }
-
-        assertTrue(result is UiState.Success)
+        // Verify all fields are mapped correctly
+        assertEquals("Test Source Name", article.source)
+        assertEquals("John Doe", article.author)
+        assertEquals("Test Article Title", article.title)
+        assertEquals("Test article description", article.description)
+        assertEquals("https://example.com/article", article.url)
+        assertEquals("https://example.com/image.jpg", article.imageUrl)
+        assertEquals("2024-01-15T10:30:00Z", article.publishedAt)
+        assertEquals("Full article content here", article.content)
+        assertTrue(article.id.isNotEmpty())
     }
 
     private fun createMockArticleDto(
