@@ -7,7 +7,6 @@ import com.newsapp.data.remote.dto.NewsResponseDto
 import com.newsapp.data.remote.dto.SourceDto
 import com.newsapp.domain.model.UiState
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
