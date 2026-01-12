@@ -80,10 +80,7 @@ com.newsapp/
 
 ## APK
 
-| Build Variant | Download |
-|:---:|:---:|
-| **BBC News** | [Download APK](https://github.com/wallysonr/News-App/releases/download/v1.0/app-bbc-debug.apk) |
-| **ESPN News** | [Download APK](https://github.com/wallysonr/News-App/releases/download/v1.0/app-espn-debug.apk) |
+**Download:** [Testing Release v1.0](https://github.com/Wallysonadsilva/news-app/releases/tag/v1.0)
 
 
 
