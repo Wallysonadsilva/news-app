@@ -1,5 +1,6 @@
 package com.newsapp.presentation.headlines
 
+import com.appmattus.kotlinfixture.kotlinFixture
 import com.newsapp.domain.model.Article
 import com.newsapp.domain.model.UiState
 import com.newsapp.domain.repository.NewsRepository
@@ -24,23 +25,11 @@ import org.junit.Test
 class HeadlinesViewModelTest {
 
     private val testDispatcher: TestDispatcher = StandardTestDispatcher()
+    private val fixture = kotlinFixture()
 
     private lateinit var repository: NewsRepository
     private lateinit var viewModel: HeadlinesViewModel
 
-    private val fakeArticles = listOf(
-        Article(
-            id = "1",
-            source = "bbc-news",
-            author = "Test Author",
-            title = "Test title",
-            description = "Test description",
-            url = "https://test.com",
-            imageUrl = "https://test.com/image.jpg",
-            publishedAt = "2025-01-01T00:00:00Z",
-            content = "Test content"
-        )
-    )
 
     @Before
     fun setUp() {
@@ -57,6 +46,7 @@ class HeadlinesViewModelTest {
     @Test
     fun `init loads headlines and emits success`() = runTest {
         // GIVEN
+        val fakeArticles = fixture<List<Article>>()
         val successState = UiState.Success(fakeArticles)
         coEvery { repository.getTopHeadlines(any()) } returns successState
 
@@ -72,7 +62,8 @@ class HeadlinesViewModelTest {
     @Test
     fun `init loads headlines and emits error`() = runTest {
         // GIVEN
-        val errorState = UiState.Error("Network error")
+        val errorMessage = fixture<String>()
+        val errorState = UiState.Error(errorMessage)
         coEvery { repository.getTopHeadlines(any()) } returns errorState
 
         // WHEN
@@ -86,6 +77,7 @@ class HeadlinesViewModelTest {
     @Test
     fun `retry triggers repository call again`() = runTest {
         // GIVEN
+        val fakeArticles = fixture<List<Article>>()
         coEvery { repository.getTopHeadlines(any()) } returns UiState.Success(fakeArticles)
         viewModel = HeadlinesViewModel(repository)
         advanceUntilIdle()
@@ -103,6 +95,7 @@ class HeadlinesViewModelTest {
     @Test
     fun `loadHeadlines handles error after successful load`() = runTest {
         // GIVEN
+        val fakeArticles = fixture<List<Article>>()
         coEvery { repository.getTopHeadlines(any()) } returns UiState.Success(fakeArticles)
         viewModel = HeadlinesViewModel(repository)
         advanceUntilIdle()
@@ -110,7 +103,8 @@ class HeadlinesViewModelTest {
         assertTrue(viewModel.uiState.value is UiState.Success)
 
         // WHEN
-        val errorState = UiState.Error("Network connection lost")
+        val errorMessage = fixture<String>()
+        val errorState = UiState.Error(errorMessage)
         coEvery { repository.getTopHeadlines(any()) } returns errorState
         viewModel.loadHeadlines(isRefresh = false)
         advanceUntilIdle()
@@ -122,7 +116,8 @@ class HeadlinesViewModelTest {
     @Test
     fun `retry after error state succeeds`() = runTest {
         // GIVEN
-        val errorState = UiState.Error("Initial network error")
+        val errorMessage = fixture<String>()
+        val errorState = UiState.Error(errorMessage)
         coEvery { repository.getTopHeadlines(any()) } returns errorState
         viewModel = HeadlinesViewModel(repository)
         advanceUntilIdle()
@@ -130,6 +125,7 @@ class HeadlinesViewModelTest {
         assertEquals(errorState, viewModel.uiState.value)
 
         // WHEN
+        val fakeArticles = fixture<List<Article>>()
         val successState = UiState.Success(fakeArticles)
         coEvery { repository.getTopHeadlines(any()) } returns successState
         viewModel.retry()
@@ -143,6 +139,7 @@ class HeadlinesViewModelTest {
     @Test
     fun `uiState starts with Loading before init completes`() = runTest {
         // GIVEN
+        val fakeArticles = fixture<List<Article>>()
         coEvery { repository.getTopHeadlines(any()) } returns UiState.Success(fakeArticles)
 
         // WHEN
