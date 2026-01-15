@@ -1,5 +1,6 @@
 package com.newsapp.presentation
 
+import com.appmattus.kotlinfixture.kotlinFixture
 import com.newsapp.presentation.biometric.BiometricAuthViewModel
 import org.junit.Assert
 import org.junit.Before
@@ -7,6 +8,7 @@ import org.junit.Test
 
 class BiometricAuthViewModelTest {
 
+    private val fixture = kotlinFixture()
     private lateinit var viewModel: BiometricAuthViewModel
 
     @Before
@@ -29,7 +31,7 @@ class BiometricAuthViewModelTest {
         // WHEN
         viewModel.onAuthSuccess()
 
-        // THEN - Verify authenticated state
+        // THEN
         Assert.assertTrue(viewModel.isAuthenticated)
         Assert.assertFalse(viewModel.shouldRequestAuth)
         Assert.assertNull(viewModel.errorMessage)
@@ -38,7 +40,7 @@ class BiometricAuthViewModelTest {
     @Test
     fun `onAuthError sets error and stops auth request`() {
         // GIVEN
-        val errorMessage = "Authentication failed"
+        val errorMessage = fixture<String>()
 
         // WHEN
         viewModel.onAuthError(errorMessage)
@@ -52,7 +54,7 @@ class BiometricAuthViewModelTest {
     @Test
     fun `requestAuth enables auth request`() {
         // GIVEN
-        viewModel.onAuthError("Some error")
+        viewModel.onAuthError(fixture<String>())
         Assert.assertFalse(viewModel.shouldRequestAuth)
 
         // WHEN
@@ -65,14 +67,15 @@ class BiometricAuthViewModelTest {
     @Test
     fun `complete authentication flow - error then success`() {
         // GIVEN
+        val errorMessage = fixture<String>()
         Assert.assertTrue(viewModel.shouldRequestAuth)
         Assert.assertFalse(viewModel.isAuthenticated)
 
         // WHEN
-        viewModel.onAuthError("Fingerprint not recognized")
+        viewModel.onAuthError(errorMessage)
 
         // THEN
-        Assert.assertEquals("Fingerprint not recognized", viewModel.errorMessage)
+        Assert.assertEquals(errorMessage, viewModel.errorMessage)
         Assert.assertFalse(viewModel.shouldRequestAuth)
         Assert.assertFalse(viewModel.isAuthenticated)
 

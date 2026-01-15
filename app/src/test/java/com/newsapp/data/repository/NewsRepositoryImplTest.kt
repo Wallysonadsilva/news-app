@@ -1,6 +1,7 @@
 @file:Suppress("FunctionName")
 package com.newsapp.data.repository
 
+import com.appmattus.kotlinfixture.kotlinFixture
 import com.newsapp.data.remote.api.NewsApiService
 import com.newsapp.data.remote.dto.ArticleDto
 import com.newsapp.data.remote.dto.NewsResponseDto
@@ -16,6 +17,7 @@ import org.junit.Test
 import java.io.IOException
 
 class NewsRepositoryImplTest {
+    private val fixture = kotlinFixture()
     private lateinit var apiService: NewsApiService
     private lateinit var repository: NewsRepositoryImpl
 
@@ -28,24 +30,19 @@ class NewsRepositoryImplTest {
     @Test
     fun `getTopHeadlines returns success with sorted articles when API call succeeds`() = runTest {
         // Given
+        val date1 = "2026-01-05T10:00:00Z"
+        val date2 = "2026-01-07T10:00:00Z"
+        val date3 = "2026-01-06T10:00:00Z"
+
         val mockArticles = listOf(
-            createMockArticleDto(
-                title = "Article 1",
-                publishedAt = "2024-01-05T10:00:00Z"
-            ),
-            createMockArticleDto(
-                title = "Article 2",
-                publishedAt = "2024-01-07T10:00:00Z"
-            ),
-            createMockArticleDto(
-                title = "Article 3",
-                publishedAt = "2024-01-06T10:00:00Z"
-            )
+            fixture<ArticleDto>().copy(publishedAt = date1),
+            fixture<ArticleDto>().copy(publishedAt = date2),
+            fixture<ArticleDto>().copy(publishedAt = date3)
         )
 
         val mockResponse = NewsResponseDto(
             status = "ok",
-            totalResults = 3,
+            totalResults = mockArticles.size,
             articles = mockArticles
         )
 
@@ -57,23 +54,23 @@ class NewsRepositoryImplTest {
         // Then
         val result = repository.getTopHeadlines("bbc-news")
 
-        // Verify
         assertTrue(result is UiState.Success)
-
         val articles = (result as UiState.Success).data
 
         assertEquals(3, articles.size)
-        assertEquals("Article 2", articles[0].title)
-        assertEquals("Article 3", articles[1].title)
-        assertEquals("Article 1", articles[2].title)
+        // Verify
+        assertEquals(date2, articles[0].publishedAt)
+        assertEquals(date3, articles[1].publishedAt)
+        assertEquals(date1, articles[2].publishedAt)
     }
 
     @Test
     fun `getTopHeadlines returns error when API call fails`() = runTest {
         // Given
+        val errorMessage = fixture<String>()
         coEvery {
             apiService.getTopHeadlines(any(), any())
-        } throws IOException("Network error")
+        } throws IOException(errorMessage)
 
         // When
         val result = repository.getTopHeadlines("bbc-news")
@@ -84,21 +81,30 @@ class NewsRepositoryImplTest {
         val error = result as UiState.Error
 
         // Verify
-        assertTrue(error.message.contains("Network error"))
+        assertTrue(error.message.contains(errorMessage))
     }
 
     @Test
     fun `getTopHeadlines maps all DTO fields to domain correctly`() = runTest {
         // Given
-        val mockArticle = ArticleDto(
-            source = SourceDto(id = "test-id", name = "Test Source Name"),
-            author = "John Doe",
-            title = "Test Article Title",
-            description = "Test article description",
-            url = "https://example.com/article",
-            urlToImage = "https://example.com/image.jpg",
-            publishedAt = "2024-01-15T10:30:00Z",
-            content = "Full article content here"
+        val testSourceName = fixture<String>()
+        val testAuthor = fixture<String>()
+        val testTitle = fixture<String>()
+        val testDescription = fixture<String>()
+        val testUrl = fixture<String>()
+        val testImageUrl = fixture<String>()
+        val testPublishedAt = "2026-01-15T10:30:00Z"
+        val testContent = fixture<String>()
+
+        val mockArticle = fixture<ArticleDto>().copy(
+            source = SourceDto(id = fixture<String>(), name = testSourceName),
+            author = testAuthor,
+            title = testTitle,
+            description = testDescription,
+            url = testUrl,
+            urlToImage = testImageUrl,
+            publishedAt = testPublishedAt,
+            content = testContent
         )
 
         val mockResponse = NewsResponseDto(
@@ -121,31 +127,15 @@ class NewsRepositoryImplTest {
 
         val article = articles[0]
 
-        // Verify all fields are mapped correctly
-        assertEquals("Test Source Name", article.source)
-        assertEquals("John Doe", article.author)
-        assertEquals("Test Article Title", article.title)
-        assertEquals("Test article description", article.description)
-        assertEquals("https://example.com/article", article.url)
-        assertEquals("https://example.com/image.jpg", article.imageUrl)
-        assertEquals("2024-01-15T10:30:00Z", article.publishedAt)
-        assertEquals("Full article content here", article.content)
+        // Verify
+        assertEquals(testSourceName, article.source)
+        assertEquals(testAuthor, article.author)
+        assertEquals(testTitle, article.title)
+        assertEquals(testDescription, article.description)
+        assertEquals(testUrl, article.url)
+        assertEquals(testImageUrl, article.imageUrl)
+        assertEquals(testPublishedAt, article.publishedAt)
+        assertEquals(testContent, article.content)
         assertTrue(article.id.isNotEmpty())
-    }
-
-    private fun createMockArticleDto(
-        title: String,
-        publishedAt: String
-    ): ArticleDto {
-        return ArticleDto(
-            source = SourceDto(id = "test", name = "Test Source"),
-            author = "Test Author",
-            title = title,
-            description = "Test description",
-            url = "https://test.com",
-            urlToImage = "https://test.com/image.jpg",
-            publishedAt = publishedAt,
-            content = "Test content"
-        )
     }
 }
