@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,7 +23,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun LockScreen(
     onAuthenticateClick: () -> Unit,
-    errorMessage: String? = null
+    errorMessage: String?,
+    isAuthenticating: Boolean = false
 ) {
     Column(
         modifier = Modifier
@@ -57,8 +59,12 @@ fun LockScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Button(onClick = onAuthenticateClick) {
-            Text("Authenticate")
+        if (isAuthenticating) {
+            CircularProgressIndicator()
+        } else {
+            Button(onClick = onAuthenticateClick) {
+                Text("Authenticate")
+            }
         }
 
         errorMessage?.let { error ->
